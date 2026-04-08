@@ -7,12 +7,10 @@ import { MonthTheme } from "@/types/calendar";
 interface HeroPageProps {
     theme: MonthTheme;
     year: number;
-    onPrev: () => void;
-    onNext: () => void;
 }
 
 export const HeroPage = React.forwardRef<HTMLDivElement, HeroPageProps>(
-    ({ theme, year, onPrev, onNext }, ref) => {
+    ({ theme, year }, ref) => {
         return (
             <div
                 ref={ref}
@@ -86,55 +84,6 @@ export const HeroPage = React.forwardRef<HTMLDivElement, HeroPageProps>(
                             {theme.sceneName}
                         </p>
                     </div>
-
-                    {/* Navigation buttons */}
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            onPrev();
-                        }}
-                        onPointerDown={(e) => e.stopPropagation()}
-                        onMouseDown={(e) => e.stopPropagation()}
-                        onMouseUp={(e) => e.stopPropagation()}
-                        onPointerUp={(e) => e.stopPropagation()}
-                        onTouchStart={(e) => e.stopPropagation()}
-                        onTouchEnd={(e) => e.stopPropagation()}
-                        aria-label="Previous month"
-                        className="absolute top-6 left-6 w-11 h-11 rounded-full flex items-center justify-center text-white text-2xl transition-all duration-200 cursor-pointer z-[100] hover:bg-white/30"
-                        style={{
-                            background: "rgba(255,255,255,0.22)",
-                            backdropFilter: "blur(8px)",
-                            border: "1px solid rgba(255,255,255,0.25)",
-                            boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-                        }}
-                    >
-                        ‹
-                    </button>
-
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            onNext();
-                        }}
-                        onPointerDown={(e) => e.stopPropagation()}
-                        onMouseDown={(e) => e.stopPropagation()}
-                        onMouseUp={(e) => e.stopPropagation()}
-                        onPointerUp={(e) => e.stopPropagation()}
-                        onTouchStart={(e) => e.stopPropagation()}
-                        onTouchEnd={(e) => e.stopPropagation()}
-                        aria-label="Next month"
-                        className="absolute top-6 right-6 w-11 h-11 rounded-full flex items-center justify-center text-white text-2xl transition-all duration-200 cursor-pointer z-[100] hover:bg-white/30"
-                        style={{
-                            background: "rgba(255,255,255,0.22)",
-                            backdropFilter: "blur(8px)",
-                            border: "1px solid rgba(255,255,255,0.25)",
-                            boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-                        }}
-                    >
-                        ›
-                    </button>
                 </div>
             </div>
         );

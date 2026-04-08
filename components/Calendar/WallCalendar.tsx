@@ -55,14 +55,11 @@ interface PageContentProps {
     setHovered: (d: Date | null) => void;
     handleDayClick: (date: Date, isCurrentMonth: boolean) => void;
     clearRange: () => void;
-    onPrev: () => void;
-    onNext: () => void;
 }
 
 function PageContent({
     year, month, layout, pageW, pageH, heroH, gridH,
     setHovered, handleDayClick, clearRange,
-    onPrev, onNext,
 }: PageContentProps) {
     const theme = MONTH_THEMES[month];
 
@@ -70,7 +67,7 @@ function PageContent({
         return (
             <div style={{ display: "flex", flexDirection: "column", width: pageW, height: pageH }}>
                 <div style={{ height: heroH, flexShrink: 0, position: "relative", overflow: "hidden" }}>
-                    <HeroPage theme={theme} year={year} onPrev={onPrev} onNext={onNext} />
+                    <HeroPage theme={theme} year={year} />
                 </div>
                 <div style={{ height: gridH, flexShrink: 0, position: "relative", overflow: "hidden" }}>
                     <GridPage
@@ -93,7 +90,7 @@ function PageContent({
     return (
         <div style={{ display: "flex", flexDirection: "row", width: pageW, height: pageH }}>
             <div style={{ width: pageW / 2, height: pageH, flexShrink: 0, position: "relative" }}>
-                <HeroPage theme={theme} year={year} onPrev={onPrev} onNext={onNext} />
+                <HeroPage theme={theme} year={year} />
             </div>
             <div style={{ width: pageW / 2, height: pageH, flexShrink: 0, position: "relative" }}>
                 <GridPage
@@ -224,8 +221,6 @@ export function WallCalendar() {
                             if (capturedMi === liveRef.current.activeMonthIdx)
                                 liveRef.current.clearRange();
                         }}
-                        onPrev={flipPrev}
-                        onNext={flipNext}
                     />
                 </SpreadPage>
             );
