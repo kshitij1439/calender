@@ -2,6 +2,7 @@
 
 import { useRef, useCallback, useState, useEffect, useMemo } from "react";
 import React from "react";
+import { createPortal } from "react-dom";
 import HTMLFlipBook from "react-pageflip";
 import { MONTH_THEMES } from "@/constants/calendar";
 import { useCalendar } from "@/hooks/useCalendar";
@@ -10,6 +11,7 @@ import { normalizeRange } from "@/utils/dateUtils";
 import { SpiralBinding } from "./SpiralBinding";
 import { HeroPage } from "./HeroPage";
 import { GridPage } from "./GridPage";
+import { NotesPanel } from "./NotesPanel";
 
 /* ── Constants ─────────────────────────────────────────────────────────────── */
 const TODAY = new Date();
@@ -34,7 +36,6 @@ SpreadPage.displayName = "SpreadPage";
 const EMPTY_RANGE = { start: null, end: null } as const;
 const NOOP = () => { };
 const NOOP_DAY = (_d: Date, _c: boolean) => { };
-const NOOP_STR = (_v: string) => { };
 
 /* ──────────────────────────────────────────────────────────────────────────────
  *  PageContent
@@ -51,34 +52,19 @@ interface PageContentProps {
     pageH: number;
     heroH: number;
     gridH: number;
-    isActive: boolean;
-    range: ReturnType<typeof useCalendar>["range"];
-    previewRange: ReturnType<typeof useCalendar>["previewRange"];
-    selectionState: ReturnType<typeof useCalendar>["selectionState"];
-    setHovered: ReturnType<typeof useCalendar>["setHovered"];
+    setHovered: (d: Date | null) => void;
     handleDayClick: (date: Date, isCurrentMonth: boolean) => void;
-    clearRange: ReturnType<typeof useCalendar>["clearRange"];
-    notes: ReturnType<typeof useNotes>["notes"];
-    input: string;
-    setInput: (v: string) => void;
-    addNote: ReturnType<typeof useNotes>["addNote"];
-    deleteNote: ReturnType<typeof useNotes>["deleteNote"];
+    clearRange: () => void;
     onPrev: () => void;
     onNext: () => void;
 }
 
 function PageContent({
     year, month, layout, pageW, pageH, heroH, gridH,
-    isActive,
-    range, previewRange, selectionState,
     setHovered, handleDayClick, clearRange,
-    notes, input, setInput, addNote, deleteNote,
     onPrev, onNext,
 }: PageContentProps) {
     const theme = MONTH_THEMES[month];
-    const activeRange = isActive ? range : EMPTY_RANGE;
-    const activePreview = isActive ? normalizeRange(previewRange) : EMPTY_RANGE;
-    const activeState = isActive ? selectionState : "idle";
 
     if (layout === "portrait") {
         return (
@@ -89,14 +75,14 @@ function PageContent({
                 <div style={{ height: gridH, flexShrink: 0, position: "relative", overflow: "hidden" }}>
                     <GridPage
                         theme={theme} year={year} month={month}
-                        range={activeRange}
-                        previewRange={activePreview}
-                        selectionState={activeState}
-                        onDayClick={isActive ? handleDayClick : NOOP_DAY}
-                        onDayHover={isActive ? setHovered : NOOP}
-                        onDayLeave={isActive ? () => setHovered(null) : NOOP}
-                        onClear={isActive ? clearRange : NOOP}
-                        notesProps={isActive ? { notes, input, setInput, addNote, deleteNote } : null}
+                        range={EMPTY_RANGE}
+                        previewRange={EMPTY_RANGE}
+                        selectionState="idle"
+                        onDayClick={handleDayClick}
+                        onDayHover={(d) => setHovered(d)}
+                        onDayLeave={() => setHovered(null)}
+                        onClear={clearRange}
+                        notesProps={null}
                     />
                 </div>
             </div>
@@ -112,14 +98,14 @@ function PageContent({
             <div style={{ width: pageW / 2, height: pageH, flexShrink: 0, position: "relative" }}>
                 <GridPage
                     theme={theme} year={year} month={month}
-                    range={activeRange}
-                    previewRange={activePreview}
-                    selectionState={activeState}
-                    onDayClick={isActive ? handleDayClick : NOOP_DAY}
-                    onDayHover={isActive ? setHovered : NOOP}
-                    onDayLeave={isActive ? () => setHovered(null) : NOOP}
-                    onClear={isActive ? clearRange : NOOP}
-                    notesProps={isActive ? { notes, input, setInput, addNote, deleteNote } : null}
+                    range={EMPTY_RANGE}
+                    previewRange={EMPTY_RANGE}
+                    selectionState="idle"
+                    onDayClick={handleDayClick}
+                    onDayHover={(d) => setHovered(d)}
+                    onDayLeave={() => setHovered(null)}
+                    onClear={clearRange}
+                    notesProps={null}
                 />
             </div>
         </div>
@@ -164,23 +150,24 @@ export function WallCalendar() {
         setActiveMonthIdx(e.data);
     }, []);
 
-    const flipNext = useCallback(() => bookRef.current?.pageFlip().flipNext("bottom"), []);
-    const flipPrev = useCallback(() => bookRef.current?.pageFlip().flipPrev("bottom"), []);
+    /* ── Flip helpers — use programmatic API ── */
+    const flipNext = useCallback(() => {
+        bookRef.current?.pageFlip()?.flipNext("bottom");
+    }, []);
 
-    /* ── Layout constants — derived from state, default gracefully when isMobile is null ── */
+    const flipPrev = useCallback(() => {
+        bookRef.current?.pageFlip()?.flipPrev("bottom");
+    }, []);
+
+    /* ── Layout constants ── */
     const layout = isMobile ? "portrait" : "landscape";
     const pageW = isMobile ? bookWidth : 840;
     const pageH = isMobile ? 680 : 560;
-    const heroH = isMobile ? 220 : pageH;
-    const gridH = isMobile ? 460 : pageH;
+    const heroH = isMobile ? 200 : pageH;
+    const gridH = isMobile ? 480 : pageH;
 
     /* ──────────────────────────────────────────────────────────────────────────
      *  liveRef — holds the latest interactive state.
-     *
-     *  PageContent callbacks close over this ref so they always read fresh
-     *  values at call time, without the pages array needing to rebuild.
-     *
-     *  IMPORTANT: declared BEFORE the early return to satisfy Rules of Hooks.
      * ────────────────────────────────────────────────────────────────────────── */
     const liveRef = useRef({
         activeMonthIdx,
@@ -197,14 +184,6 @@ export function WallCalendar() {
 
     /* ──────────────────────────────────────────────────────────────────────────
      *  pages — STABLE array via useMemo.
-     *
-     *  Only rebuilds when layout geometry changes (which also triggers a full
-     *  flipbook remount via `key`). Never rebuilds on calendar state changes.
-     *
-     *  All interactive callbacks delegate to liveRef so they stay correct
-     *  without causing the array to rebuild.
-     *
-     *  IMPORTANT: declared BEFORE the early return to satisfy Rules of Hooks.
      * ────────────────────────────────────────────────────────────────────────── */
     const pages = useMemo(() => {
         const arr: React.ReactElement[] = [];
@@ -225,17 +204,6 @@ export function WallCalendar() {
                         pageH={pageH}
                         heroH={heroH}
                         gridH={gridH}
-                        /* Static — active state is handled via liveRef callbacks */
-                        isActive={false}
-                        range={EMPTY_RANGE}
-                        previewRange={EMPTY_RANGE}
-                        selectionState="idle"
-                        notes={[]}
-                        input=""
-                        setInput={NOOP_STR}
-                        addNote={NOOP}
-                        deleteNote={NOOP}
-                        /* Callbacks read liveRef at call time — always fresh */
                         setHovered={(d) => liveRef.current.setHovered(d)}
                         handleDayClick={(d, isCurrentMonth) => {
                             if (capturedMi === liveRef.current.activeMonthIdx)
@@ -252,12 +220,25 @@ export function WallCalendar() {
             );
         }
         return arr;
-        // pageW/pageH/heroH/gridH/layout change together and are all derived from
-        // isMobile + bookWidth, so listing them covers all resize cases.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [layout, pageW, pageH, heroH, gridH]);
 
-    /* ── Early return AFTER all hooks — acts as a render gate only ── */
+    /* ──────────────────────────────────────────────────────────────────────────
+     *  Portal target — find the notes container in the active page's DOM.
+     *  After each flip or mount, we locate the portal target div.
+     * ────────────────────────────────────────────────────────────────────────── */
+    const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+
+    useEffect(() => {
+        // Small delay to ensure react-pageflip has rendered the pages
+        const timer = setTimeout(() => {
+            const el = document.getElementById(`notes-portal-${activeYear}-${activeMonth}`);
+            setPortalTarget(el);
+        }, 100);
+        return () => clearTimeout(timer);
+    }, [activeYear, activeMonth, isMobile, bookWidth]);
+
+    /* ── Early return AFTER all hooks ── */
     if (isMobile === null) return null;
 
     /* ── flipbook key forces full remount when layout geometry changes ── */
@@ -276,9 +257,9 @@ export function WallCalendar() {
         onFlip: handleFlip,
         className: "wall-calendar-book",
         style: {} as React.CSSProperties,
-        showPageCorners: true,
-        disableFlipByClick: true,
-        clickEventForward: false,
+        showPageCorners: false,
+        disableFlipByClick: false,
+        clickEventForward: true,
         useMouseEvents: true,
     };
 
@@ -309,6 +290,7 @@ export function WallCalendar() {
                         </HTMLFlipBook>
                     </div>
 
+                    {/* Nav buttons */}
                     <div className="mt-4 flex items-center justify-center gap-4 w-full">
                         <NavButton onClick={flipPrev} label="‹" ariaLabel="Previous month" />
                         <div className="text-center" style={{ minWidth: "160px" }}>
@@ -349,6 +331,7 @@ export function WallCalendar() {
                         </HTMLFlipBook>
                     </div>
 
+                    {/* Nav buttons */}
                     <div className="mt-5 flex items-center justify-center gap-4 w-full">
                         <NavButton onClick={flipPrev} label="‹" ariaLabel="Previous month" />
                         <div className="text-center" style={{ minWidth: "180px" }}>
@@ -365,6 +348,22 @@ export function WallCalendar() {
                     </div>
                 </div>
             )}
+
+            {/* Portal: inject live NotesPanel into the active grid page */}
+            {portalTarget && createPortal(
+                <NotesPanel
+                    notes={notes}
+                    input={input}
+                    setInput={setInput}
+                    addNote={addNote}
+                    deleteNote={deleteNote}
+                    range={range}
+                    year={activeYear}
+                    month={activeMonth}
+                    accent={activeTheme.accent}
+                />,
+                portalTarget
+            )}
         </div>
     );
 }
@@ -375,10 +374,10 @@ function NavButton({ onClick, label, ariaLabel }: { onClick: () => void; label: 
         <button
             onClick={onClick}
             aria-label={ariaLabel}
-            className="w-9 h-9 rounded-full flex items-center justify-center text-xl transition-all duration-200"
-            style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.55)", border: "1px solid rgba(255,255,255,0.1)" }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.16)"; e.currentTarget.style.color = "#fff"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.07)"; e.currentTarget.style.color = "rgba(255,255,255,0.55)"; }}
+            className="w-10 h-10 rounded-full flex items-center justify-center text-2xl font-semibold transition-all duration-200 cursor-pointer"
+            style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)", border: "1px solid rgba(255,255,255,0.15)" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.22)"; e.currentTarget.style.color = "#fff"; e.currentTarget.style.transform = "scale(1.1)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "rgba(255,255,255,0.7)"; e.currentTarget.style.transform = "scale(1)"; }}
         >
             {label}
         </button>

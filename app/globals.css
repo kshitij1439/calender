@@ -39,10 +39,27 @@ body {
     overflow: hidden !important;
 }
 
+/*
+ * react-pageflip places a .stf__block overlay on top of page content
+ * for drag detection. With clickEventForward: true, it checks tagName
+ * and skips buttons/links. But we need to ensure buttons have high z-index
+ * and proper pointer-events so they sit above the overlay visually.
+ */
+.stf__parent .stf__item {
+    pointer-events: auto !important;
+}
+
+.stf__parent .stf__item button {
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 100;
+    cursor: pointer;
+}
+
 .stf__parent .stf__item input,
-.stf__parent .stf__item button,
 .stf__parent .stf__item textarea {
     pointer-events: auto !important;
     position: relative;
-    z-index: 10;
+    z-index: 100;
+    cursor: text;
 }
