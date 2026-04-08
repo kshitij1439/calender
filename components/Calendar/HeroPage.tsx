@@ -82,21 +82,26 @@ export const HeroPage = React.forwardRef<HTMLDivElement, HeroPageProps>(
                 <button
                     onClick={(e) => {
                         e.stopPropagation();
+                        e.preventDefault();
                         onPrev();
                     }}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
                     aria-label="Previous month"
-                    className="absolute top-4 left-4 w-9 h-9 rounded-full flex items-center justify-center text-white text-lg transition-all duration-200"
+                    className="absolute top-4 left-4 w-10 h-10 rounded-full flex items-center justify-center text-white text-xl transition-all duration-200 cursor-pointer z-50"
                     style={{
-                        background: "rgba(255,255,255,0.14)",
+                        background: "rgba(255,255,255,0.18)",
                         backdropFilter: "blur(6px)",
+                        border: "1px solid rgba(255,255,255,0.2)",
                     }}
                     onMouseEnter={(e) =>
                         (e.currentTarget.style.background =
-                            "rgba(255,255,255,0.28)")
+                            "rgba(255,255,255,0.35)")
                     }
                     onMouseLeave={(e) =>
                         (e.currentTarget.style.background =
-                            "rgba(255,255,255,0.14)")
+                            "rgba(255,255,255,0.18)")
                     }
                 >
                     ‹
@@ -105,21 +110,26 @@ export const HeroPage = React.forwardRef<HTMLDivElement, HeroPageProps>(
                 <button
                     onClick={(e) => {
                         e.stopPropagation();
+                        e.preventDefault();
                         onNext();
                     }}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
                     aria-label="Next month"
-                    className="absolute top-4 right-4 w-9 h-9 rounded-full flex items-center justify-center text-white text-lg transition-all duration-200"
+                    className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center text-white text-xl transition-all duration-200 cursor-pointer z-50"
                     style={{
-                        background: "rgba(255,255,255,0.14)",
+                        background: "rgba(255,255,255,0.18)",
                         backdropFilter: "blur(6px)",
+                        border: "1px solid rgba(255,255,255,0.2)",
                     }}
                     onMouseEnter={(e) =>
                         (e.currentTarget.style.background =
-                            "rgba(255,255,255,0.28)")
+                            "rgba(255,255,255,0.35)")
                     }
                     onMouseLeave={(e) =>
                         (e.currentTarget.style.background =
-                            "rgba(255,255,255,0.14)")
+                            "rgba(255,255,255,0.18)")
                     }
                 >
                     ›

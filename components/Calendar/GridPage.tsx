@@ -66,9 +66,9 @@ export const GridPage = React.forwardRef<HTMLDivElement, GridPageProps>(
                     style={{ background: theme.accent }}
                 />
 
-                <div className="flex-1 flex flex-col px-6 pt-5 pb-4 overflow-hidden">
+                <div className="flex-1 flex flex-col px-6 pt-4 pb-3 overflow-y-auto overflow-x-hidden">
                     {/* Month header on the grid side */}
-                    <div className="flex items-center justify-between mb-3 flex-shrink-0">
+                    <div className="flex items-center justify-between mb-2 flex-shrink-0">
                         <h3
                             className="text-base font-semibold tracking-tight"
                             style={{
@@ -105,6 +105,9 @@ export const GridPage = React.forwardRef<HTMLDivElement, GridPageProps>(
                         onDayHover={onDayHover}
                         onDayLeave={onDayLeave}
                     />
+
+                    {/* Portal target for live notes injection */}
+                    <div id={`notes-portal-${year}-${month}`} className="flex-shrink-0" />
 
                     {notesProps && (
                         <NotesPanel

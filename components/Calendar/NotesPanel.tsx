@@ -3,6 +3,7 @@
 import { Note, DateRange } from "@/types/calendar";
 import { formatRangeLabel } from "@/utils/dateUtils";
 import { MONTH_THEMES } from "@/constants/calendar";
+import { useState } from "react";
 
 interface NotesPanelProps {
     notes: Note[];
@@ -31,25 +32,32 @@ export function NotesPanel({
     const label = range.start
         ? formatRangeLabel(range)
         : `${theme.month} ${year}`;
+    const [hoveredNoteId, setHoveredNoteId] = useState<string | null>(null);
 
     return (
-        <div className="mt-4 pt-4" style={{ borderTop: "1px solid #e5e7eb" }}>
+        <div
+            className="mt-3 pt-3"
+            style={{ borderTop: "1px solid #e5e7eb" }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+        >
             {/* Header */}
             <div className="flex items-center justify-between mb-2">
                 <span
                     className="tracking-[3px] uppercase"
                     style={{
-                        fontSize: "0.62rem",
+                        fontSize: "0.6rem",
                         color: "#9ca3af",
                         fontFamily: "var(--font-dm-sans)",
                         fontWeight: 500,
                     }}
                 >
-                    Notes
+                    📝 Notes
                 </span>
                 <span
                     style={{
-                        fontSize: "0.68rem",
+                        fontSize: "0.65rem",
                         color: accent,
                         fontFamily: "var(--font-dm-sans)",
                     }}
@@ -60,20 +68,25 @@ export function NotesPanel({
 
             {/* Existing notes */}
             {notes.length > 0 && (
-                <div className="mb-3 space-y-1.5 max-h-[80px] overflow-y-auto pr-1">
+                <div className="mb-2 space-y-1.5 max-h-[72px] overflow-y-auto pr-1">
                     {notes.map((note) => (
                         <div
                             key={note.id}
-                            className="flex items-start gap-2 group"
+                            className="flex items-start gap-2 group relative"
+                            onMouseEnter={() => setHoveredNoteId(note.id)}
+                            onMouseLeave={() => setHoveredNoteId(null)}
                         >
                             <div
-                                className="flex-1 text-[0.75rem] italic px-2 py-1 rounded-r"
+                                className="flex-1 text-[0.72rem] px-2 py-1 rounded-r"
                                 style={{
                                     borderLeft: `3px solid ${accent}`,
                                     background: theme.accentLight,
                                     color: "#374151",
                                     fontFamily: "var(--font-dm-sans)",
                                     lineHeight: "1.4",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
                                 }}
                             >
                                 {note.content}
@@ -81,24 +94,61 @@ export function NotesPanel({
                             <button
                                 onClick={() => deleteNote(note.id)}
                                 aria-label="Delete note"
-                                className="text-gray-300 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity text-sm mt-0.5 leading-none"
+                                className="text-gray-300 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity text-sm mt-0.5 leading-none flex-shrink-0"
                             >
                                 ×
                             </button>
+
+                            {/* Hover tooltip */}
+                            {hoveredNoteId === note.id && (
+                                <div
+                                    className="absolute left-0 right-6 z-50"
+                                    style={{
+                                        bottom: "calc(100% + 4px)",
+                                        background: "#1f2937",
+                                        color: "#f3f4f6",
+                                        fontSize: "0.72rem",
+                                        fontFamily: "var(--font-dm-sans)",
+                                        padding: "6px 10px",
+                                        borderRadius: "6px",
+                                        lineHeight: "1.5",
+                                        boxShadow: "0 4px 14px rgba(0,0,0,0.3)",
+                                        pointerEvents: "none",
+                                        wordWrap: "break-word",
+                                        whiteSpace: "normal",
+                                    }}
+                                >
+                                    {note.content}
+                                    <div
+                                        style={{
+                                            position: "absolute",
+                                            bottom: "-4px",
+                                            left: "16px",
+                                            width: "8px",
+                                            height: "8px",
+                                            background: "#1f2937",
+                                            transform: "rotate(45deg)",
+                                        }}
+                                    />
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>
             )}
 
             {/* Input */}
-            <div className="flex gap-2">
+            <div className="flex gap-1.5">
                 <input
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && addNote()}
+                    onKeyDown={(e) => {
+                        e.stopPropagation();
+                        if (e.key === "Enter") addNote();
+                    }}
                     placeholder="Add a note…"
-                    className="flex-1 text-[0.78rem] px-3 py-2 rounded border outline-none transition-colors"
+                    className="flex-1 text-[0.72rem] px-2.5 py-1.5 rounded border outline-none transition-colors"
                     style={{
                         borderColor: "#e5e7eb",
                         background: "#fafaf9",
@@ -110,7 +160,7 @@ export function NotesPanel({
                 />
                 <button
                     onClick={addNote}
-                    className="px-4 py-2 text-[0.72rem] font-medium tracking-wide text-white rounded transition-opacity hover:opacity-85"
+                    className="px-3 py-1.5 text-[0.68rem] font-medium tracking-wide text-white rounded transition-opacity hover:opacity-85"
                     style={{
                         background: accent,
                         fontFamily: "var(--font-dm-sans)",
