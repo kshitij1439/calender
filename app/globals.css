@@ -12,41 +12,37 @@ body {
     padding: 0;
 }
 
-/* Smooth scrollbar for notes */
 .overflow-y-auto::-webkit-scrollbar {
     width: 3px;
 }
+
 .overflow-y-auto::-webkit-scrollbar-track {
     background: transparent;
 }
+
 .overflow-y-auto::-webkit-scrollbar-thumb {
     background: #d1d5db;
     border-radius: 2px;
 }
 
-/* ── react-pageflip overrides ─────────────────────────────────────── */
-
 .wall-calendar-book {
     border-radius: 0 0 12px 12px;
 }
 
-/* Kill the library's default black background on all page items */
 .stf__parent .stf__item {
     background: transparent !important;
     background-color: transparent !important;
 }
 
-/* Even pages (0-indexed) = HeroPage (left) — dark photo bg */
-.stf__parent .stf__item:nth-child(odd) {
-    background-color: #111 !important;
-}
-
-/* Odd pages (0-indexed) = GridPage (right) — cream paper bg */
-.stf__parent .stf__item:nth-child(even) {
-    background-color: #f6f3ed !important;
-}
-
 .stf__parent {
     border-radius: 0 0 12px 12px;
     overflow: hidden !important;
+}
+
+.stf__parent .stf__item input,
+.stf__parent .stf__item button,
+.stf__parent .stf__item textarea {
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 10;
 }
