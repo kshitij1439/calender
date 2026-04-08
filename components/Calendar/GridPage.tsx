@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { MonthTheme, DateRange, SelectionState } from "@/types/calendar";
+import { MonthTheme, DateRange, SelectionState, Note } from "@/types/calendar";
 import { CalendarGrid } from "./CalendarGrid";
 import { RangeStatusBar } from "./RangeStatusBar";
 import { buildCalendarGrid } from "@/utils/dateUtils";
+import { NotesPanel } from "./NotesPanel";
 
 interface GridPageProps {
     theme: MonthTheme;
@@ -17,6 +18,13 @@ interface GridPageProps {
     onDayHover: (date: Date) => void;
     onDayLeave: () => void;
     onClear: () => void;
+    notesProps?: {
+        notes: Note[];
+        input: string;
+        setInput: (v: string) => void;
+        addNote: () => void;
+        deleteNote: (id: string) => void;
+    } | null;
 }
 
 export const GridPage = React.forwardRef<HTMLDivElement, GridPageProps>(
@@ -32,6 +40,7 @@ export const GridPage = React.forwardRef<HTMLDivElement, GridPageProps>(
             onDayHover,
             onDayLeave,
             onClear,
+            notesProps,
         },
         ref
     ) => {
@@ -96,6 +105,20 @@ export const GridPage = React.forwardRef<HTMLDivElement, GridPageProps>(
                         onDayHover={onDayHover}
                         onDayLeave={onDayLeave}
                     />
+
+                    {notesProps && (
+                        <NotesPanel
+                            notes={notesProps.notes}
+                            input={notesProps.input}
+                            setInput={notesProps.setInput}
+                            addNote={notesProps.addNote}
+                            deleteNote={notesProps.deleteNote}
+                            range={range}
+                            year={year}
+                            month={month}
+                            accent={theme.accent}
+                        />
+                    )}
                 </div>
                 </div>
             </div>

@@ -9,7 +9,6 @@ import { normalizeRange } from "@/utils/dateUtils";
 import { SpiralBinding } from "./SpiralBinding";
 import { HeroPage } from "./HeroPage";
 import { GridPage } from "./GridPage";
-import { NotesPanel } from "./NotesPanel";
 
 /* ── Constants ─────────────────────────────────────────────────────────────── */
 const TODAY      = new Date();
@@ -115,6 +114,7 @@ export function WallCalendar() {
                     onDayHover={isActive ? setHovered : () => {}}
                     onDayLeave={isActive ? () => setHovered(null) : () => {}}
                     onClear={isActive ? clearRange : () => {}}
+                    notesProps={isActive ? { notes, input, setInput, addNote, deleteNote } : null}
                 />
             );
         }
@@ -172,6 +172,7 @@ export function WallCalendar() {
                             onDayHover={setHovered}
                             onDayLeave={() => setHovered(null)}
                             onClear={clearRange}
+                            notesProps={{ notes, input, setInput, addNote, deleteNote }}
                         />
                     </div>
                 </div>
@@ -210,7 +211,7 @@ export function WallCalendar() {
                             style={{}}
                             swipeDistance={40}
                             showPageCorners={true}
-                            disableFlipByClick={false}
+                            disableFlipByClick={true}
                             maxShadowOpacity={0.45}
                             clickEventForward={true}
                             useMouseEvents={true}
@@ -287,21 +288,6 @@ export function WallCalendar() {
                     </div>
                 </>
             )}
-
-            {/* Notes Section - rendered identically for Mobile and Desktop at the bottom */}
-            <div className={`w-full max-w-[420px] lg:max-w-[840px] mx-auto bg-[#fafaf9] rounded-xl shadow-2xl p-5 ${isMobile ? "mt-2" : "mt-8"}`}>
-                <NotesPanel
-                    notes={notes}
-                    input={input}
-                    setInput={setInput}
-                    addNote={addNote}
-                    deleteNote={deleteNote}
-                    range={range}
-                    year={activeYear}
-                    month={activeMonth}
-                    accent={activeTheme.accent}
-                />
-            </div>
         </div>
     );
 }
