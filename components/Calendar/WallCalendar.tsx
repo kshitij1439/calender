@@ -55,14 +55,11 @@ interface PageContentProps {
     setHovered: (d: Date | null) => void;
     handleDayClick: (date: Date, isCurrentMonth: boolean) => void;
     clearRange: () => void;
-    onPrev: () => void;
-    onNext: () => void;
 }
 
 function PageContent({
     year, month, layout, pageW, pageH, heroH, gridH,
     setHovered, handleDayClick, clearRange,
-    onPrev, onNext,
 }: PageContentProps) {
     const theme = MONTH_THEMES[month];
 
@@ -70,7 +67,7 @@ function PageContent({
         return (
             <div style={{ display: "flex", flexDirection: "column", width: pageW, height: pageH }}>
                 <div style={{ height: heroH, flexShrink: 0, position: "relative", overflow: "hidden" }}>
-                    <HeroPage theme={theme} year={year} onPrev={onPrev} onNext={onNext} />
+                    <HeroPage theme={theme} year={year} />
                 </div>
                 <div style={{ height: gridH, flexShrink: 0, position: "relative", overflow: "hidden" }}>
                     <GridPage
@@ -93,7 +90,7 @@ function PageContent({
     return (
         <div style={{ display: "flex", flexDirection: "row", width: pageW, height: pageH }}>
             <div style={{ width: pageW / 2, height: pageH, flexShrink: 0, position: "relative" }}>
-                <HeroPage theme={theme} year={year} onPrev={onPrev} onNext={onNext} />
+                <HeroPage theme={theme} year={year} />
             </div>
             <div style={{ width: pageW / 2, height: pageH, flexShrink: 0, position: "relative" }}>
                 <GridPage
@@ -123,9 +120,14 @@ export function WallCalendar() {
 
     useEffect(() => {
         const check = () => {
-            const mobile = window.innerWidth < 880;
+            const width = window.innerWidth;
+            const mobile = width < 880;
             setIsMobile(mobile);
-            if (mobile) setBookWidth(Math.min(window.innerWidth, 420));
+            if (mobile) {
+                setBookWidth(Math.min(width - 32, 420));
+            } else {
+                setBookWidth(Math.min(width - 64, 840));
+            }
         };
         check();
         window.addEventListener("resize", check);
@@ -152,12 +154,18 @@ export function WallCalendar() {
 
     /* ── Flip helpers — use programmatic API ── */
     const flipNext = useCallback(() => {
-        bookRef.current?.pageFlip()?.flipNext("bottom");
+        const next = liveRef.current.activeMonthIdx + 1;
+        if (next < TOTAL_MONTHS) {
+            bookRef.current?.pageFlip()?.turnToPage(next);
+        }
     }, []);
 
     const flipPrev = useCallback(() => {
-        bookRef.current?.pageFlip()?.flipPrev("bottom");
-    }, []);
+        const prev = liveRef.current.activeMonthIdx - 1;
+        if (prev >= 0) {
+            bookRef.current?.pageFlip()?.turnToPage(prev);
+        }
+    }, [TOTAL_MONTHS]);
 
     /* ── Layout constants ── */
     const layout = isMobile ? "portrait" : "landscape";
@@ -213,15 +221,13 @@ export function WallCalendar() {
                             if (capturedMi === liveRef.current.activeMonthIdx)
                                 liveRef.current.clearRange();
                         }}
-                        onPrev={flipPrev}
-                        onNext={flipNext}
                     />
                 </SpreadPage>
             );
         }
         return arr;
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [layout, pageW, pageH, heroH, gridH]);
+    }, [layout, pageW, pageH, heroH, gridH, TOTAL_MONTHS]);
 
     /* ──────────────────────────────────────────────────────────────────────────
      *  Portal target — find the notes container in the active page's DOM.
@@ -258,8 +264,8 @@ export function WallCalendar() {
         className: "wall-calendar-book",
         style: {} as React.CSSProperties,
         showPageCorners: false,
-        disableFlipByClick: false,
-        clickEventForward: true,
+        disableFlipByClick: true,
+        clickEventForward: false,
         useMouseEvents: true,
     };
 
