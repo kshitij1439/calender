@@ -105,7 +105,7 @@ export const MONTH_THEMES: MonthTheme[] = [
         month: "December",
         shortMonth: "Dec",
         imagePath: "/images/dec.jpg",
-        accent: "#0F172A",
+        accent: "#8d9ec4ff",
         accentLight: "#F8FAFC",
         sceneName: "Year's End",
     },
