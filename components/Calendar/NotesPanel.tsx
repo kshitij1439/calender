@@ -99,39 +99,6 @@ export function NotesPanel({
                                 ×
                             </button>
 
-                            {/* Hover tooltip */}
-                            {hoveredNoteId === note.id && (
-                                <div
-                                    className="absolute left-0 right-6 z-50"
-                                    style={{
-                                        bottom: "calc(100% + 4px)",
-                                        background: "#1f2937",
-                                        color: "#f3f4f6",
-                                        fontSize: "0.72rem",
-                                        fontFamily: "var(--font-dm-sans)",
-                                        padding: "6px 10px",
-                                        borderRadius: "6px",
-                                        lineHeight: "1.5",
-                                        boxShadow: "0 4px 14px rgba(0,0,0,0.3)",
-                                        pointerEvents: "none",
-                                        wordWrap: "break-word",
-                                        whiteSpace: "normal",
-                                    }}
-                                >
-                                    {note.content}
-                                    <div
-                                        style={{
-                                            position: "absolute",
-                                            bottom: "-4px",
-                                            left: "16px",
-                                            width: "8px",
-                                            height: "8px",
-                                            background: "#1f2937",
-                                            transform: "rotate(45deg)",
-                                        }}
-                                    />
-                                </div>
-                            )}
                         </div>
                     ))}
                 </div>
