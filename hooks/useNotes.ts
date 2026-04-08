@@ -10,18 +10,16 @@ import {
 import { NOTES_STORAGE_KEY } from "@/constants/calendar";
 
 export function useNotes(year: number, month: number, range: DateRange) {
-    const [notes, setNotes] = useState<Note[]>([]);
-    const [input, setInput] = useState("");
-
-    // Load from localStorage
-    useEffect(() => {
+    const [notes, setNotes] = useState<Note[]>(() => {
+        if (typeof window === "undefined") return [];
         try {
             const raw = localStorage.getItem(NOTES_STORAGE_KEY);
-            if (raw) setNotes(JSON.parse(raw));
+            return raw ? JSON.parse(raw) : [];
         } catch {
-            /* ignore */
+            return [];
         }
-    }, []);
+    });
+    const [input, setInput] = useState("");
 
     // Persist
     useEffect(() => {
